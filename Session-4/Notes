@@ -1,0 +1,20 @@
+VNET Peering:
+We want to estalblish a communication in the following cases:
+1) Make Communication possible between vNET's in SAME REGION
+2) Make Communication possible between vNET's in DIFFERENT REGION
+3) Make Communication possible between vNET's in DIFFERENT SUBSCRIPTION
+
+We're proving 2 statements over here:
+1. The DEV-SUBSCRIPTION is in one Tenant but we are using different subscription.
+i.e vNET & VM is also in that subscription only.
+2. If we have 2 subscriptions we can able to estalblish the communication between them by 
+using vNET Peering.
+
+3. Incase if you have the 2 Tenant's ID's in between them also possible to 
+estalblish a communication between them. But here the setup and practical is taken complicated.
+
+Finally, vNET Peering is possible in this ways:
+- In one location using vNET Peering is possible.
+- In multiple regions also vNET Peering is possible.
+- In Multiple subscriptions also vNET peering is possible.
+- In Multiple Tenant's also vNET peering is possible.

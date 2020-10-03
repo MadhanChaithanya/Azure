@@ -1,0 +1,91 @@
+Bash Scipting:
+
+az vm list 
+
+az vm list | grep -i Name
+
+az vm list | grep -i computerName 
+
+az vm list | grep -i computerName | cut -d ":" -f 2
+
+#!/bin/bash
+echo "Running the script now....!"
+
+echo "Creating Azure Resource Group"
+az group create -l eastus -n CHAITHUAZ
+
+echo "Creating Azure Virtual Network"
+az network vnet create -g CHAITHUAZ -n CHAITHUAZ-vNET1 --address-prefix 10.1.0.0/16 \
+--subnet-name CHAITHUAZ-Subnet-1 --subnet-prefix 10.1.1.0/24 -l eastus
+
+echo "Creating Azure Subnets"
+az network vnet subnet create -g CHAITHUAZ --vnet-name CHAITHUAZ-vNET1 -n CHAITHUAZ-Subnet-2 \
+--address-prefix 10.1.2.0/24
+az network vnet subnet create -g CHAITHUAZ --vnet-name CHAITHUAZ-vNET1 -n CHAITHUAZ-Subnet-3 \
+--address-prefix 10.1.3.0/24
+
+echo "Creating Azure NSG and RULES"
+az network nsg create -g CHAITHUAZ -n CHAITHUAZ_NSG1
+az network nsg rule create -g CHAITHUAZ --nsg-name CHAITHUAZ_NSG1 -n CHAITHUAZ_NSG1_RULE1 --priority 100 \
+--source-address-prefixes '*' --source-port-ranges '*'      --destination-address-prefixes '*' \
+--destination-port-ranges '*' --access Allow    --protocol Tcp --description "Allowing All Traffic For Now"
+
+echo "Creating Azure Availability Set"
+az vm availability-set create --name EAST-AVSET1 -g CHAITHUAZ --location eastus \
+--platform-fault-domain-count 3 --platform-update-domain-count 5
+
+
+# After this
+madhan@Azure:~$ ll | grep az-chaithu.sh
+-rw-r--r-- 1 madhan madhan 1193 Oct  1 15:23 az-chaithu.sh
+chmod 700 az-chaithu.sh
+madhan@Azure:~$ ll | grep az-chaithu.sh
+-rwx------ 1 madhan madhan 1193 Oct  1 15:23 az-chaithu.sh*
+
+To run the script you can use the following lines:
+bash az-chaithu.sh
+or
+./az-chaithu.sh
+
+
+10.1.1.0/24
+
+10.1.1.0 => Network ID
+10.1.1.255 => BroadCast ID
+Azure: 10.1.1.1 to 10.1.1.3 => Reserved IP's -> You cannot use it.
+Customer: 10.1.1.4 to 10.1.1.254
+
+WebServers  => 30   - 10.1.1.0/24
+AppServers  => 20   - 10.1.2.0/24
+DbServers   => 10   - 10.1.3.0/24
+
+If you follow the above approach it will waste the IP's like hell
+
+Recommended Practice is:
+
+WebServers  => 30   - 10.1.1.0/26   =>  10.1.1.1  - 10.1.1.62
+AppServers  => 20   - 10.1.1.65/27  =>  10.1.1.65 - 10.1.1.94
+DbServers   => 10   - 10.1.1.96/28  =>  10.1.1.97 - 10.1.1.110
+
+
+DEV & SIT   => Testing and Dev Sub
+CHAITHUAZ-DEV
+CHAITHUAZ-SIT 
+
+UAT & PROD  => Prod Sub 
+CHAITHUAZ-UAT
+CHAITHUAZ-PROD
+
+
+
+ipconfig
+ipconfig /all => we can see DNS Server
+
+echo "Creating Azure Virtual Machines"
+az vm create --resource-group CHAITHUAZ --name CHAITHUAZTestVM1 --image UbuntuLTS --vnet-name CHAITHUAZ-vNET1 \
+--subnet CHAITHUAZ-Subnet-1 --admin-username testuser --admin-password "Chaithu@1234" --size Standard_B1s \
+--availability-set EAST-AVSET1 --nsg CHAITHUAZ_NSG1 
+
+az vm create --resource-group CHAITHUAZ --name CHAITHUAZTestVM2 --image UbuntuLTS --vnet-name CHAITHUAZ-vNET1 \
+--subnet CHAITHUAZ-Subnet-2 --admin-username testuser --admin-password "Chaithu@1234" --size Standard_B1s \
+--availability-set EAST-AVSET1 --nsg CHAITHUAZ_NSG1 
